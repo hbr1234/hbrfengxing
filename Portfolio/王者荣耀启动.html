@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>王者荣耀战绩炫耀大厅</title>
+<style>
+  :root{
+    --green:#10b981;
+    --cyan:#06b6d4;
+    --ink:#0f2e2a;
+    --ink-soft:#3d6b64;
+    --danger:#fb7185;
+    --gold:#f59e0b;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    min-height:100vh;
+    background:#f2fbf7;
+    color:var(--ink);
+    font-family:"PingFang SC","Microsoft YaHei","Segoe UI",system-ui,sans-serif;
+    overflow-x:hidden;
+  }
+  /* 绿色/青色柔光背景 */
+  .halo{position:fixed;border-radius:50%;filter:blur(70px);pointer-events:none;z-index:0;}
+  .halo1{width:480px;height:480px;top:-140px;left:-120px;background:radial-gradient(circle,rgba(16,185,129,.38),transparent 70%);}
+  .halo2{width:540px;height:540px;bottom:-180px;right:-140px;background:radial-gradient(circle,rgba(34,211,238,.34),transparent 70%);}
+  .halo3{width:380px;height:380px;top:42%;left:56%;background:radial-gradient(circle,rgba(52,211,153,.20),transparent 70%);}
+
+  .wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:28px 18px 40px;}
+
+  header.top{text-align:center;margin-bottom:22px;}
+  header.top h1{
+    font-size:30px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(135deg,#059669,#0891b2);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  header.top p{margin-top:6px;color:var(--ink-soft);font-size:14px;}
+
+  .glass{
+    background:rgba(255,255,255,.55);
+    backdrop-filter:blur(20px) saturate(150%);
+    -webkit-backdrop-filter:blur(20px) saturate(150%);
+    border:1px solid rgba(255,255,255,.65);
+    border-radius:20px;
+    box-shadow:0 8px 32px rgba(13,148,136,.10);
+  }
+  .card{padding:20px 22px;margin-bottom:18px;}
+  .card h2{font-size:16px;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+  .dot{width:9px;height:9px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--cyan));flex:none;}
+
+  /* 上传区 */
+  .input-row{display:flex;gap:14px;flex-wrap:wrap;align-items:stretch;}
+  .dropzone{
+    flex:1 1 260px;border:2px dashed rgba(16,185,129,.55);border-radius:16px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+    padding:22px;cursor:pointer;transition:.25s;text-align:center;color:var(--ink-soft);
+  }
+  .dropzone:hover,.dropzone.drag{background:rgba(16,185,129,.08);border-color:var(--green);}
+  .dropzone b{color:var(--ink);font-size:15px;}
+  .dropzone span{font-size:12.5px;}
+  .paste-box{flex:2 1 340px;display:flex;flex-direction:column;gap:10px;}
+  textarea{
+    flex:1;min-height:110px;resize:vertical;border-radius:14px;border:1px solid rgba(255,255,255,.8);
+    background:rgba(255,255,255,.7);padding:12px 14px;font-size:13.5px;color:var(--ink);
+    font-family:inherit;outline:none;transition:.2s;
+  }
+  textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(16,185,129,.15);}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;}
+  button{
+    border:none;cursor:pointer;border-radius:999px;padding:10px 22px;font-size:14px;
+    font-family:inherit;transition:.2s;font-weight:600;
+  }
+  .btn-primary{background:linear-gradient(135deg,var(--green),var(--cyan));color:#fff;box-shadow:0 6px 18px rgba(16,185,129,.35);}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(16,185,129,.45);}
+  .btn-ghost{background:rgba(255,255,255,.65);color:var(--ink);border:1px solid rgba(16,185,129,.35);}
+  .btn-ghost:hover{background:rgba(255,255,255,.9);}
+  .btn-danger{background:rgba(251,113,133,.12);color:#e11d48;border:1px solid rgba(251,113,133,.4);}
+  .btn-danger:hover{background:rgba(251,113,133,.2);}
+
+  details.help{margin-top:14px;font-size:13px;color:var(--ink-soft);}
+  details.help summary{cursor:pointer;font-weight:600;color:var(--ink);user-select:none;}
+  details.help .fmt{margin-top:10px;background:rgba(255,255,255,.6);border-radius:12px;padding:12px 14px;line-height:1.9;}
+  details.help code{background:rgba(16,185,129,.12);padding:1px 6px;border-radius:6px;color:#047857;}
+
+  /* 荣耀称号横幅 */
+  #titleBanner{
+    margin-bottom:14px;padding:16px 14px;border-radius:16px;text-align:center;
+    background:linear-gradient(135deg,rgba(245,158,11,.16),rgba(16,185,129,.14),rgba(34,211,238,.16));
+    border:1px solid rgba(245,158,11,.4);
+  }
+  #titleBanner .t-label{font-size:12px;color:#92702a;letter-spacing:6px;font-weight:600;}
+  #titleBanner .t-name{
+    font-size:24px;font-weight:800;margin-top:4px;letter-spacing:2px;
+    background:linear-gradient(135deg,#f59e0b,#10b981);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  #titleBanner .t-star{color:var(--gold);font-size:13px;letter-spacing:2px;}
+
+  /* 炫耀文案 */
+  .brag-text{
+    background:rgba(255,255,255,.7);border-radius:14px;padding:16px 18px;
+    font-size:14.5px;line-height:2;color:var(--ink);
+  }
+  .brag-text b{
+    background:linear-gradient(135deg,#f59e0b,#e11d48);
+    -webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800;
+  }
+
+  /* 统计卡片 */
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:12px;}
+  .stat{
+    background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.7);border-radius:16px;
+    padding:14px 10px;text-align:center;transition:.2s;
+  }
+  .stat:hover{transform:translateY(-3px);box-shadow:0 10px 22px rgba(13,148,136,.14);}
+  .stat .label{font-size:12px;color:var(--ink-soft);}
+  .stat .value{
+    font-size:24px;font-weight:800;margin-top:4px;
+    background:linear-gradient(135deg,#059669,#0891b2);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .stat .sub{font-size:11px;color:var(--ink-soft);margin-top:3px;}
+
+  /* 图表 */
+  .charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;}
+  .chart-card{padding:16px;}
+  .chart-card h3{font-size:14px;margin-bottom:6px;display:flex;align-items:center;gap:7px;}
+  .chart{width:100%;height:280px;}
+  .chart-tall{height:300px;}
+
+  /* 表格 */
+  .table-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;}
+  select{
+    border-radius:999px;border:1px solid rgba(16,185,129,.4);background:rgba(255,255,255,.75);
+    padding:7px 16px;font-size:13px;color:var(--ink);outline:none;font-family:inherit;cursor:pointer;
+  }
+  .table-scroll{max-height:430px;overflow:auto;border-radius:12px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  thead th{
+    position:sticky;top:0;background:rgba(232,250,243,.95);backdrop-filter:blur(8px);
+    padding:10px 12px;text-align:left;font-size:12.5px;color:#047857;z-index:2;
+  }
+  tbody td{padding:10px 12px;border-top:1px solid rgba(16,185,129,.10);}
+  tbody tr:hover{background:rgba(16,185,129,.06);}
+  .badge{display:inline-block;padding:3px 12px;border-radius:999px;font-size:12px;font-weight:600;}
+  .badge.win{background:rgba(16,185,129,.16);color:#047857;}
+  .badge.loss{background:rgba(251,113,133,.15);color:#e11d48;}
+  .badge.mvp{background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;margin-left:5px;font-size:11px;padding:2px 8px;}
+
+  #emptyHint{padding:56px 20px;text-align:center;color:var(--ink-soft);}
+  #emptyHint b{display:block;font-size:17px;color:var(--ink);margin-bottom:8px;}
+
+  footer{text-align:center;font-size:12px;color:var(--ink-soft);margin-top:8px;}
+  #loadErr{display:none;background:rgba(251,113,133,.12);border:1px solid rgba(251,113,133,.35);color:#be123c;border-radius:12px;padding:10px 14px;font-size:13px;margin-bottom:16px;}
+
+  @media (max-width:640px){
+    header.top h1{font-size:24px;}
+    .card{padding:16px;}
+  }
+</style>
+</head>
+<body>
+<div class="halo halo1"></div>
+<div class="halo halo2"></div>
+<div class="halo halo3"></div>
+
+<main class="wrap">
+  <header class="top">
+    <h1>王者荣耀战绩炫耀大厅</h1>
+    <p>上传战绩，一键生成你的峡谷高光数据 —— 胜率、MVP、超神指数，全都亮出来</p>
+  </header>
+
+  <div id="loadErr"></div>
+
+  <!-- 数据录入 -->
+  <section class="glass card">
+    <h2><span class="dot"></span>导入战绩</h2>
+    <div class="input-row">
+      <div class="dropzone" id="dropzone">
+        <b>点击选择或拖拽文件到此处</b>
+        <span>支持 .csv / .txt（首行表头自动识别列名；无表头按 日期,模式,英雄,结果,击杀,死亡,助攻,评分,时长 顺序解析）</span>
+        <input type="file" id="fileInput" accept=".csv,.txt" hidden>
+      </div>
+      <div class="paste-box">
+        <textarea id="pasteArea" placeholder="也可直接粘贴战绩文本，每行一条，例如：
+2026-09-29 21:36 排位赛 孙尚香 胜利 MVP 8/2/10 评分12.8
+巅峰赛 貂蝉 失败 3/6/8"></textarea>
+        <div class="btn-row">
+          <button class="btn-primary" id="parsePasteBtn">解析粘贴内容</button>
+          <button class="btn-ghost" id="demoBtn">载入示例数据</button>
+          <button class="btn-danger" id="clearBtn">清空数据</button>
+        </div>
+      </div>
+    </div>
+    <details class="help">
+      <summary>支持的格式说明</summary>
+      <div class="fmt">
+        <b>方式一：CSV / TXT 文件</b><br>
+        首行为表头时自动识别列名：<code>日期</code> <code>模式</code> <code>英雄</code> <code>结果</code> <code>击杀</code> <code>死亡</code> <code>助攻</code> <code>评分</code> <code>时长</code>（也兼容英文 kills / deaths / assists / hero / result 等）。<br>
+        无表头时按列顺序：<code>日期,模式,英雄,结果,击杀,死亡,助攻,评分,时长</code><br>
+        结果列写 <code>胜</code> / <code>胜利</code> / <code>win</code> / <code>负</code> / <code>失败</code> 均可。<br>
+        <b>方式二：粘贴文本</b>（如从王者营地复制的对局记录）<br>
+        每行一条，自动识别日期、模式、英雄、胜负、MVP、<code>击杀/死亡/助攻</code>、评分。例：<br>
+        <code>2026-09-29 21:36 排位赛 孙尚香 胜利 MVP 8/2/10 评分12.8</code><br>
+        <code>巅峰赛 貂蝉 失败 3/6/8</code>
+      </div>
+    </details>
+  </section>
+
+  <!-- 统计卡片 -->
+  <section id="statsWrap" class="glass card" hidden>
+    <h2><span class="dot"></span>总览统计</h2>
+    <div id="titleBanner">
+      <div class="t-label">峡谷荣耀称号</div>
+      <div class="t-name" id="playerTitle">--</div>
+      <div class="t-star">★ ★ ★ ★ ★</div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat"><div class="label">峡谷征程</div><div class="value" id="statTotal">0</div><div class="sub" id="statDecided"></div></div>
+      <div class="stat"><div class="label">碾压胜率</div><div class="value" id="statWinRate">--</div><div class="sub" id="statWL"></div></div>
+      <div class="stat"><div class="label">场均拿头</div><div class="value" id="statK">--</div></div>
+      <div class="stat"><div class="label">场均送头</div><div class="value" id="statD">--</div></div>
+      <div class="stat"><div class="label">场均带飞</div><div class="value" id="statA">--</div></div>
+      <div class="stat"><div class="label">超神指数</div><div class="value" id="statKDA">--</div><div class="sub">(拿头+带飞)/送头</div></div>
+      <div class="stat"><div class="label">carry 全场</div><div class="value" id="statMVP">0</div></div>
+      <div class="stat"><div class="label">单场封神</div><div class="value" id="statMaxRating">--</div></div>
+    </div>
+  </section>
+
+  <!-- 炫耀文案 -->
+  <section id="bragWrap" class="glass card" hidden>
+    <h2><span class="dot"></span>炫耀一下</h2>
+    <div class="brag-text" id="bragText"></div>
+    <div class="btn-row">
+      <button class="btn-primary" id="copyBragBtn">复制炫耀文案</button>
+    </div>
+  </section>
+
+  <!-- 图表 -->
+  <section id="chartsWrap" hidden>
+    <div class="charts-grid">
+      <div class="glass chart-card"><h3><span class="dot"></span>胜率碾压现场</h3><div class="chart" id="chartResult"></div></div>
+      <div class="glass chart-card"><h3><span class="dot"></span>本命英雄榜</h3><div class="chart" id="chartHero"></div></div>
+      <div class="glass chart-card"><h3><span class="dot"></span>制霸战场分布</h3><div class="chart" id="chartMode"></div></div>
+      <div class="glass chart-card"><h3><span class="dot"></span>高光数据走势</h3><div class="chart chart-tall" id="chartTrend"></div></div>
+    </div>
+  </section>
+
+  <!-- 明细表 -->
+  <section id="tableWrap" class="glass card" hidden>
+    <div class="table-head">
+      <h2><span class="dot"></span>高光战绩墙</h2>
+      <select id="resultFilter">
+        <option value="all">全部结果</option>
+        <option value="win">仅胜利</option>
+        <option value="loss">仅失败</option>
+      </select>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr>
+          <th>时间</th><th>模式</th><th>英雄</th><th>结果</th><th>击杀</th><th>死亡</th><th>助攻</th><th>评分</th><th>时长</th>
+        </tr></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <div id="emptyHint" class="glass">
+    <b>峡谷荣耀档案还是空的</b>
+    上传战绩文件、粘贴战绩文本，或点击「载入示例数据」—— 看看你的称号能有多嚣张
+  </div>
+
+  <footer>纯本地运行 · 数据仅存于浏览器 localStorage · 图表库通过 CDN 加载，首次打开需联网 · 炫耀虽好，低调上分</footer>
+</main>
+
+<script>
+/* ========== CDN 库加载（含备用源） ========== */
+function loadScript(src){
+  return new Promise(function(res,rej){
+    var s=document.createElement('script');
+    s.src=src;s.onload=res;s.onerror=rej;
+    document.head.appendChild(s);
+  });
+}
+async function loadWithFallback(urls){
+  for(var i=0;i<urls.length;i++){
+    try{ await loadScript(urls[i]); return true; }catch(e){}
+  }
+  return false;
+}
+
+/* ========== 全局状态 ========== */
+var records=[];   // {date,mode,hero,result:'win'|'loss'|'',kills,deaths,assists,rating,mvp,time,duration}
+var charts={};
+var LS_KEY='hok_records_v1';
+
+function $(id){return document.getElementById(id);}
+
+/* ========== 工具函数 ========== */
+function esc(s){
+  return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function num(v){
+  if(v===''||v==null)return null;
+  var n=parseFloat(String(v).replace(/[^\d.\-]/g,''));
+  return isNaN(n)?null:n;
+}
+function normResult(v){
+  if(v==null)return '';
+  var s=String(v).toLowerCase();
+  if(/胜|赢|win|victory|true|^1$/.test(s))return 'win';
+  if(/负|败|输|lose|defeat|false|^0$/.test(s))return 'loss';
+  return '';
+}
+function normMode(m){
+  m=String(m||'');
+  if(/巅峰/.test(m))return '巅峰赛';
+  if(/排位/.test(m))return '排位赛';
+  if(/匹配/.test(m))return '匹配赛';
+  if(/乱斗/.test(m))return '大乱斗';
+  if(/火焰山/.test(m))return '火焰山';
+  if(/克隆/.test(m))return '克隆大战';
+  if(/五军/.test(m))return '五军对决';
+  if(/边境/.test(m))return '边境突围';
+  if(/人机/.test(m))return '人机局';
+  if(/赏金/.test(m))return '赏金赛';
+  return m||'其他';
+}
+
+/* ========== 文本战绩解析（每行一条） ========== */
+function parseLine(line){
+  if(!line||!line.trim())return null;
+  var rec={date:'',time:'',mode:'',hero:'',result:'',kills:null,deaths:null,assists:null,rating:null,mvp:false,duration:''};
+  var s=line;
+
+  var dm=s.match(/(\d{4}[-/.年]\d{1,2}[-/.月]\d{1,2}日?)/);
+  if(dm){rec.date=dm[1];s=s.replace(dm[0],' ');}
+  var tm=s.match(/\b(\d{1,2}:\d{2})\b/);
+  if(tm){rec.time=tm[1];s=s.replace(tm[0],' ');}
+
+  var mm=s.match(/(巅峰赛|排位赛?|匹配赛?|无限乱斗|大乱斗|火焰山大作战|火焰山|克隆大战|克隆|五军对决|边境突围|人机|娱乐模式|赏金赛)/);
+  if(mm){rec.mode=normMode(mm[1]);s=s.replace(mm[0],' ');}
+
+  var km=s.match(/(\d{1,2})\s*[\/-]\s*(\d{1,2})\s*[\/-]\s*(\d{1,2})/);
+  if(km){rec.kills=+km[1];rec.deaths=+km[2];rec.assists=+km[3];s=s.replace(km[0],' ');}
+
+  var rm=s.match(/评分[:：]?\s*(\d+(?:\.\d+)?)/);
+  if(rm){rec.rating=parseFloat(rm[1]);s=s.replace(rm[0],' ');}
+
+  if(/mvp/i.test(s)){rec.mvp=true;s=s.replace(/mvp/gi,' ');}
+
+  if(/胜利|赢了|获胜|win|victory/i.test(s))rec.result='win';
+  else if(/失败|输了|战败|败北|lose|defeat/i.test(s))rec.result='loss';
+  s=s.replace(/胜利|获胜|赢了|win|victory|失败|输了|战败|败北|lose|defeat/gi,' ');
+
+  s=s.replace(/五杀|四杀|三杀|双杀|超神|金牌|银牌|铜牌|首胜|连胜|连败|全场最佳|最佳|今天|昨天|前天/gi,' ');
+
+  var hm=s.match(/[\u4e00-\u9fa5]{2,8}/);
+  if(hm)rec.hero=hm[0];
+
+  if(!rec.result&&rec.kills===null)return null;   // 不是有效战绩行
+  return rec;
+}
+function parseText(text){
+  var out=[];
+  text.split(/\r?\n/).forEach(function(line){
+    var r=parseLine(line);
+    if(r)out.push(r);
+  });
+  return out;
+}
+
+/* ========== CSV 解析 ========== */
+var ALIAS={
+  date:['日期','时间','对局时间','date','time'],
+  mode:['模式','类型','对局模式','mode','type'],
+  hero:['英雄','英雄名','hero','champion'],
+  result:['结果','胜负','胜负结果','result','outcome'],
+  kills:['击杀','杀敌','人头','kills'],
+  deaths:['死亡','阵亡','deaths'],
+  assists:['助攻','assists'],
+  rating:['评分','综合评分','rating','score'],
+  mvp:['mvp'],
+  duration:['时长','对局时长','duration']
+};
+function mapHeader(h){
+  h=String(h||'').trim().toLowerCase();
+  for(var key in ALIAS){
+    var list=ALIAS[key];
+    for(var i=0;i<list.length;i++){
+      if(h===list[i]||h.indexOf(list[i])>-1)return key;
+    }
+  }
+  return null;
+}
+function mapRowObject(row){
+  var rec={date:'',time:'',mode:'',hero:'',result:'',kills:null,deaths:null,assists:null,rating:null,mvp:false,duration:''};
+  for(var k in row){
+    var field=mapHeader(k);
+    if(!field)continue;
+    var v=row[k];
+    if(v===''||v==null)continue;
+    if(field==='result')rec.result=normResult(v);
+    else if(field==='mvp')rec.mvp=/mvp|是|true|1|y/i.test(String(v));
+    else if(field==='kills')rec.kills=num(v);
+    else if(field==='deaths')rec.deaths=num(v);
+    else if(field==='assists')rec.assists=num(v);
+    else if(field==='rating')rec.rating=num(v);
+    else rec[field]=String(v).trim();
+  }
+  return rec;
+}
+function mapRowPositional(arr){
+  var rec={date:'',time:'',mode:'',hero:'',result:'',kills:null,deaths:null,assists:null,rating:null,mvp:false,duration:''};
+  var g=function(i){return arr[i]!=null?String(arr[i]).trim():'';};
+  rec.date=g(0);rec.mode=normMode(g(1));rec.hero=g(2);
+  rec.result=normResult(g(3));
+  rec.kills=num(g(4));rec.deaths=num(g(5));rec.assists=num(g(6));
+  rec.rating=num(g(7));rec.duration=g(8);
+  return rec;
+}
+function isValidRec(r){
+  return r&&(r.result||r.kills!==null||(r.hero&&r.hero!==''));
+}
+function parseCSVText(text){
+  var firstLine=(text.split(/\r?\n/).find(function(l){return l.trim();})||'');
+  var hasHeader=/击杀|死亡|助攻|英雄|结果|模式|评分|时长|kills|deaths|assists|hero|result|mode|rating|score/i.test(firstLine);
+  var res=Papa.parse(text,{header:hasHeader,skipEmptyLines:true});
+  var out=[];
+  res.data.forEach(function(row){
+    var rec=hasHeader?mapRowObject(row):mapRowPositional(row);
+    if(isValidRec(rec))out.push(rec);
+  });
+  return out;
+}
+
+/* ========== 文件读取（智能编码：UTF-8 / GBK） ========== */
+function smartDecode(buf){
+  try{return new TextDecoder('utf-8',{fatal:true}).decode(buf);}
+  catch(e){
+    try{return new TextDecoder('gbk').decode(buf);}
+    catch(e2){return new TextDecoder('utf-8').decode(buf);}
+  }
+}
+function handleFile(f){
+  if(!f)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var text;
+    try{text=smartDecode(e.target.result);}
+    catch(err){text=String(e.target.result);}
+    var isCSV=/\.csv$/i.test(f.name);
+    var list=isCSV?parseCSVText(text):parseText(text);
+    if(list.length){
+      records=list;
+      renderAll();
+      alert('成功导入 '+list.length+' 条战绩（已替换当前数据）');
+    }else{
+      alert('未能从文件中解析出有效战绩，请检查格式（可参考「格式说明」）');
+    }
+  };
+  reader.readAsArrayBuffer(f);
+}
+
+/* ========== 示例数据 ========== */
+var DEMO=[
+  {date:'2026-09-29 21:36',mode:'排位赛',hero:'孙尚香',result:'win',kills:9,deaths:2,assists:7,rating:12.8,mvp:true},
+  {date:'2026-09-29 20:52',mode:'排位赛',hero:'貂蝉',result:'loss',kills:4,deaths:6,assists:5,rating:6.9,mvp:false},
+  {date:'2026-09-29 20:05',mode:'巅峰赛',hero:'镜',result:'win',kills:11,deaths:4,assists:6,rating:13.2,mvp:true},
+  {date:'2026-09-28 22:41',mode:'巅峰赛',hero:'赵云',result:'win',kills:6,deaths:3,assists:12,rating:11.4,mvp:false},
+  {date:'2026-09-28 21:58',mode:'排位赛',hero:'鲁班七号',result:'loss',kills:5,deaths:7,assists:3,rating:5.8,mvp:false},
+  {date:'2026-09-28 21:10',mode:'排位赛',hero:'孙尚香',result:'win',kills:7,deaths:1,assists:9,rating:12.1,mvp:true},
+  {date:'2026-09-27 23:02',mode:'大乱斗',hero:'安琪拉',result:'win',kills:13,deaths:8,assists:4,rating:10.6,mvp:false},
+  {date:'2026-09-27 22:15',mode:'大乱斗',hero:'王昭君',result:'loss',kills:6,deaths:9,assists:7,rating:7.2,mvp:false},
+  {date:'2026-09-27 21:20',mode:'排位赛',hero:'兰陵王',result:'win',kills:10,deaths:3,assists:5,rating:12.6,mvp:true},
+  {date:'2026-09-26 22:47',mode:'排位赛',hero:'亚瑟',result:'loss',kills:3,deaths:5,assists:8,rating:6.4,mvp:false},
+  {date:'2026-09-26 21:33',mode:'匹配赛',hero:'后羿',result:'win',kills:8,deaths:2,assists:6,rating:11.8,mvp:false},
+  {date:'2026-09-26 20:40',mode:'匹配赛',hero:'蔡文姬',result:'win',kills:1,deaths:4,assists:18,rating:10.2,mvp:false},
+  {date:'2026-09-25 22:30',mode:'巅峰赛',hero:'吕布',result:'loss',kills:4,deaths:6,assists:4,rating:6.1,mvp:false},
+  {date:'2026-09-25 21:44',mode:'排位赛',hero:'貂蝉',result:'win',kills:9,deaths:5,assists:8,rating:11.9,mvp:false},
+  {date:'2026-09-25 20:52',mode:'排位赛',hero:'孙尚香',result:'win',kills:12,deaths:3,assists:4,rating:13.6,mvp:true},
+  {date:'2026-09-24 22:20',mode:'火焰山',hero:'妲己',result:'win',kills:15,deaths:7,assists:3,rating:11.1,mvp:false},
+  {date:'2026-09-24 21:35',mode:'排位赛',hero:'程咬金',result:'loss',kills:2,deaths:8,assists:9,rating:5.4,mvp:false},
+  {date:'2026-09-24 20:48',mode:'排位赛',hero:'镜',result:'win',kills:8,deaths:4,assists:9,rating:12.0,mvp:false}
+];
+
+/* ========== 统计渲染 ========== */
+function renderStats(){
+  var total=records.length;
+  var decided=records.filter(function(r){return r.result;});
+  var wins=decided.filter(function(r){return r.result==='win'}).length;
+  var losses=decided.length-wins;
+  var withKda=records.filter(function(r){return r.kills!==null&&r.deaths!==null&&r.assists!==null;});
+  var sumK=0,sumD=0,sumA=0;
+  withKda.forEach(function(r){sumK+=r.kills;sumD+=r.deaths;sumA+=r.assists;});
+  var n=withKda.length||1;
+  var mvpCount=records.filter(function(r){return r.mvp;}).length;
+  var maxRating=null;
+  records.forEach(function(r){if(r.rating!=null&&(maxRating===null||r.rating>maxRating))maxRating=r.rating;});
+
+  $('statTotal').textContent=total;
+  $('statDecided').textContent='胜负明确 '+decided.length+' 场';
+  $('statWinRate').textContent=decided.length?(wins/decided.length*100).toFixed(1)+'%':'--';
+  $('statWL').textContent=decided.length?('胜 '+wins+' / 负 '+losses):'';
+  $('statK').textContent=withKda.length?(sumK/n).toFixed(1):'--';
+  $('statD').textContent=withKda.length?(sumD/n).toFixed(1):'--';
+  $('statA').textContent=withKda.length?(sumA/n).toFixed(1):'--';
+  $('statKDA').textContent=withKda.length?(sumD>0?((sumK+sumA)/sumD).toFixed(2):(sumK+sumA).toFixed(1)):'--';
+  $('statMVP').textContent=mvpCount;
+  $('statMaxRating').textContent=maxRating!=null?maxRating.toFixed(1):'--';
+
+  /* 峡谷荣耀称号 */
+  var winRateNum=decided.length?wins/decided.length*100:0;
+  var kdaVal=withKda.length&&sumD>0?(sumK+sumA)/sumD:null;
+  var title='未来国服选手';
+  if(decided.length>=10&&winRateNum>=75)title='峡谷收割机 · 胜率之王';
+  else if(mvpCount>=8)title='MVP 制造机';
+  else if(maxRating!=null&&maxRating>=13)title='单场封神选手';
+  else if(kdaVal!=null&&kdaVal>=4)title='零送超神流';
+  else if(decided.length>=5&&winRateNum>=60)title='上分小能手';
+  else if(total>=10)title='勤学苦练型选手';
+  $('playerTitle').textContent=title;
+
+  /* 炫耀文案 */
+  var heroCount={};
+  records.forEach(function(r){if(r.hero){heroCount[r.hero]=(heroCount[r.hero]||0)+1;}});
+  var topHero=Object.keys(heroCount).sort(function(a,b){return heroCount[b]-heroCount[a];})[0];
+  var fmt=function(v,fix){return v==null?'--':v.toFixed(fix||1);};
+  var brag='我最近在王者峡谷狂揽 <b>'+total+'</b> 场对局，'
+    +'碾压胜率高达 <b>'+(decided.length?winRateNum.toFixed(1)+'%':'--')+'</b>'
+    +(decided.length?('（胜 <b>'+wins+'</b> 场）'):'')
+    +'，砍下 <b>'+mvpCount+'</b> 次 MVP！'
+    +(withKda.length?('场均 拿头 <b>'+fmt(sumK/n)+'</b> / 送头 <b>'+fmt(sumD/n)+'</b> / 带飞 <b>'+fmt(sumA/n)+'</b>，超神指数 <b>'+(kdaVal!=null?kdaVal.toFixed(2):fmt(sumK+sumA))+'</b>'):'')
+    +(maxRating!=null?('，单场最高评分 <b>'+fmt(maxRating)+'</b> 直接封神'):'')
+    +(topHero?('。本命英雄 <b>'+esc(topHero)+'</b> 出场 '+heroCount[topHero]+' 场，出场率拉满'):'')
+    +'。这就是实力的证明，不服来 solo！';
+  $('bragText').innerHTML=brag;
+}
+
+/* ========== 图表渲染 ========== */
+function ensureChart(id){
+  if(charts[id])return charts[id];
+  if(!window.echarts)return null;
+  charts[id]=echarts.init($(id));
+  return charts[id];
+}
+function baseText(){return {color:'#0f2e2a',fontFamily:'inherit'};}
+function drawCharts(){
+  if(!window.echarts)return;
+
+  /* 1. 胜负环形图 */
+  var decided=records.filter(function(r){return r.result;});
+  var wins=decided.filter(function(r){return r.result==='win'}).length;
+  var losses=decided.length-wins;
+  var winRate=decided.length?(wins/decided.length*100).toFixed(1):'--';
+  var c1=ensureChart('chartResult');
+  if(c1)c1.setOption({
+    backgroundColor:'transparent',
+    tooltip:{trigger:'item'},
+    title:{text:winRate+'%',subtext:'胜率碾压',left:'center',top:'40%',
+      textStyle:{fontSize:26,fontWeight:800,color:'#047857'},subtextStyle:{fontSize:12,color:'#3d6b64'}},
+    series:[{
+      type:'pie',radius:['58%','78%'],center:['50%','50%'],
+      itemStyle:{borderRadius:8,borderColor:'rgba(255,255,255,.8)',borderWidth:2},
+      label:{show:true,formatter:'{b} {c}场'},
+      data:[
+        wins?{name:'胜利',value:wins,itemStyle:{color:'#10b981'}}:null,
+        losses?{name:'失败',value:losses,itemStyle:{color:'#fb7185'}}:null
+      ].filter(Boolean)
+    }]
+  });
+
+  /* 2. 英雄出场 Top 8 */
+  var heroCount={};
+  records.forEach(function(r){if(r.hero){heroCount[r.hero]=(heroCount[r.hero]||0)+1;}});
+  var heroArr=Object.keys(heroCount).map(function(h){return {name:h,value:heroCount[h]};})
+    .sort(function(a,b){return b.value-a.value;}).slice(0,8).reverse();
+  var c2=ensureChart('chartHero');
+  if(c2)c2.setOption({
+    backgroundColor:'transparent',
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},
+    grid:{left:8,right:36,top:10,bottom:6,containLabel:true},
+    xAxis:{type:'value',minInterval:1,splitLine:{lineStyle:{color:'rgba(16,185,129,.12)'}}},
+    yAxis:{type:'category',data:heroArr.map(function(x){return x.name;}),axisLabel:baseText()},
+    series:[{
+      type:'bar',barWidth:16,
+      data:heroArr.map(function(x){return x.value;}),
+      itemStyle:{borderRadius:[0,8,8,0],
+        color:new echarts.graphic.LinearGradient(0,0,1,0,[{offset:0,color:'#06b6d4'},{offset:1,color:'#10b981'}])},
+      label:{show:true,position:'right',color:'#047857',fontWeight:600}
+    }]
+  });
+
+  /* 3. 模式分布 */
+  var modeCount={};
+  records.forEach(function(r){var m=r.mode||'其他';modeCount[m]=(modeCount[m]||0)+1;});
+  var modeArr=Object.keys(modeCount).map(function(m){return {name:m,value:modeCount[m]};});
+  var palette=['#10b981','#06b6d4','#34d399','#22d3ee','#0ea5e9','#14b8a6','#84cc16','#a3e635'];
+  var c3=ensureChart('chartMode');
+  if(c3)c3.setOption({
+    backgroundColor:'transparent',
+    tooltip:{trigger:'item',formatter:'{b}: {c}场 ({d}%)'},
+    legend:{bottom:0,textStyle:baseText(),icon:'circle'},
+    series:[{
+      type:'pie',radius:['38%','66%'],center:['50%','44%'],
+      itemStyle:{borderRadius:8,borderColor:'rgba(255,255,255,.8)',borderWidth:2},
+      label:{formatter:'{b}\n{c}场'},
+      color:palette,
+      data:modeArr
+    }]
+  });
+
+  /* 4. KDA 走势（按录入顺序） */
+  var kdaRecs=records.filter(function(r){return r.kills!==null&&r.deaths!==null&&r.assists!==null;});
+  var c4=ensureChart('chartTrend');
+  if(c4){
+    if(!kdaRecs.length){
+      c4.setOption({backgroundColor:'transparent',title:{text:'暂无 KDA 数据',left:'center',top:'middle',textStyle:{color:'#3d6b64',fontSize:14,fontWeight:400}},xAxis:{show:false},yAxis:{show:false},series:[]});
+    }else{
+      c4.setOption({
+        backgroundColor:'transparent',
+        tooltip:{trigger:'axis',
+          formatter:function(params){
+            var i=params[0].dataIndex;var r=kdaRecs[i];
+            var line=params.map(function(p){return p.marker+p.seriesName+': '+p.value;}).join('<br>');
+            return esc((r.date||'')+' '+(r.hero||''))+'<br>'+line;
+          }},
+        legend:{top:0,textStyle:baseText(),icon:'roundRect',itemWidth:14},
+        grid:{left:8,right:16,top:34,bottom:6,containLabel:true},
+        xAxis:{type:'category',data:kdaRecs.map(function(_,i){return i+1;}),
+          name:'场次',nameTextStyle:{color:'#3d6b64'},
+          axisLabel:{color:'#3d6b64'},axisLine:{lineStyle:{color:'rgba(16,185,129,.3)'}}},
+        yAxis:{type:'value',minInterval:1,splitLine:{lineStyle:{color:'rgba(16,185,129,.12)'}}},
+        series:[
+          {name:'击杀',type:'line',smooth:true,symbolSize:6,data:kdaRecs.map(function(r){return r.kills;}),lineStyle:{width:3,color:'#10b981'},itemStyle:{color:'#10b981'},areaStyle:{color:'rgba(16,185,129,.10)'}},
+          {name:'死亡',type:'line',smooth:true,symbolSize:6,data:kdaRecs.map(function(r){return r.deaths;}),lineStyle:{width:3,color:'#fb7185'},itemStyle:{color:'#fb7185'}},
+          {name:'助攻',type:'line',smooth:true,symbolSize:6,data:kdaRecs.map(function(r){return r.assists;}),lineStyle:{width:3,color:'#06b6d4'},itemStyle:{color:'#06b6d4'}}
+        ]
+      });
+    }
+  }
+}
+
+/* ========== 明细表渲染 ========== */
+function renderTable(){
+  var filter=$('resultFilter').value;
+  var rows=records.slice().reverse().filter(function(r){
+    return filter==='all'||r.result===filter;
+  });
+  var html=rows.map(function(r){
+    var time=(r.date||'')+(r.time?(' '+r.time):'');
+    var badge=r.result==='win'?'<span class="badge win">胜利</span>'
+             :r.result==='loss'?'<span class="badge loss">失败</span>':'<span class="badge" style="background:rgba(148,163,184,.2);color:#475569">未知</span>';
+    var mvp=r.mvp?'<span class="badge mvp">MVP</span>':'';
+    var kda=r.kills!==null?r.kills:'-';
+    var dt=r.deaths!==null?r.deaths:'-';
+    var at=r.assists!==null?r.assists:'-';
+    var rt=r.rating!=null?r.rating.toFixed(1):'-';
+    return '<tr><td>'+esc(time||'-')+'</td><td>'+esc(r.mode||'-')+'</td><td>'+esc(r.hero||'-')+'</td>'
+      +'<td>'+badge+mvp+'</td><td>'+kda+'</td><td>'+dt+'</td><td>'+at+'</td><td>'+rt+'</td><td>'+esc(r.duration||'-')+'</td></tr>';
+  }).join('');
+  $('tableBody').innerHTML=html||'<tr><td colspan="9" style="text-align:center;color:#3d6b64;padding:24px">该筛选条件下暂无战绩</td></tr>';
+}
+
+/* ========== 总渲染 & 持久化 ========== */
+function save(){
+  try{localStorage.setItem(LS_KEY,JSON.stringify(records));}catch(e){}
+}
+function renderAll(){
+  var has=records.length>0;
+  $('statsWrap').hidden=!has;
+  $('bragWrap').hidden=!has;
+  $('chartsWrap').hidden=!has;
+  $('tableWrap').hidden=!has;
+  $('emptyHint').hidden=has;
+  if(has){
+    renderStats();
+    drawCharts();
+    renderTable();
+    save();
+  }
+}
+
+/* ========== 事件绑定 & 初始化 ========== */
+function init(){
+  var dz=$('dropzone'),fi=$('fileInput');
+
+  dz.addEventListener('click',function(){fi.click();});
+  fi.addEventListener('change',function(){handleFile(fi.files[0]);fi.value='';});
+  dz.addEventListener('dragover',function(e){e.preventDefault();dz.classList.add('drag');});
+  dz.addEventListener('dragleave',function(){dz.classList.remove('drag');});
+  dz.addEventListener('drop',function(e){
+    e.preventDefault();dz.classList.remove('drag');
+    handleFile(e.dataTransfer.files[0]);
+  });
+
+  $('parsePasteBtn').addEventListener('click',function(){
+    var list=parseText($('pasteArea').value);
+    if(list.length){
+      records=list;renderAll();
+      alert('成功解析 '+list.length+' 条战绩（已替换当前数据）');
+    }else{
+      alert('未能解析出有效战绩，请每行一条，包含 胜利/失败 与 击杀/死亡/助攻 信息');
+    }
+  });
+
+  $('demoBtn').addEventListener('click',function(){
+    records=JSON.parse(JSON.stringify(DEMO));
+    renderAll();
+  });
+
+  $('clearBtn').addEventListener('click',function(){
+    if(!confirm('确定清空所有战绩数据吗？'))return;
+    records=[];
+    try{localStorage.removeItem(LS_KEY);}catch(e){}
+    renderAll();
+  });
+
+  $('resultFilter').addEventListener('change',renderTable);
+
+  $('copyBragBtn').addEventListener('click',function(){
+    var text=$('bragText').innerText;
+    function ok(){alert('炫耀文案已复制，快去发到群里让他们看看！');}
+    function fallback(){
+      var ta=document.createElement('textarea');
+      ta.value=text;document.body.appendChild(ta);ta.select();
+      try{document.execCommand('copy');ok();}catch(e){alert('复制失败，请手动选择文字复制');}
+      document.body.removeChild(ta);
+    }
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(ok,fallback);
+    }else{fallback();}
+  });
+
+  window.addEventListener('resize',function(){
+    Object.keys(charts).forEach(function(k){charts[k].resize();});
+  });
+
+  /* 读取本地缓存 */
+  try{
+    var saved=localStorage.getItem(LS_KEY);
+    if(saved)records=JSON.parse(saved)||[];
+  }catch(e){records=[];}
+  renderAll();
+}
+
+window.addEventListener('DOMContentLoaded',async function(){
+  var okEcharts=await loadWithFallback([
+    'https://registry.npmmirror.com/echarts/5.5.0/files/dist/echarts.min.js',
+    'https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js',
+    'https://unpkg.com/echarts@5.5.0/dist/echarts.min.js'
+  ]);
+  var okPapa=await loadWithFallback([
+    'https://registry.npmmirror.com/papaparse/5.4.1/files/papaparse.min.js',
+    'https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js',
+    'https://unpkg.com/papaparse@5.4.1/papaparse.min.js'
+  ]);
+  var errs=[];
+  if(!okEcharts)errs.push('ECharts 图表库');
+  if(!okPapa)errs.push('PapaParse 解析库');
+  if(errs.length){
+    var el=$('loadErr');
+    el.style.display='block';
+    el.textContent='提示：'+errs.join('、')+' 加载失败（CDN 需联网）。导入与统计功能仍可用，图表暂不可见。';
+  }
+  init();
+});
+</script>
+</body>
+</html>
